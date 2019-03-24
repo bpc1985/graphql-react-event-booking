@@ -1,0 +1,8 @@
+{
+    "env": {
+        "MONGO_USER": "bpc1985",
+        "MONGO_PASSWORD": "hnh2812",
+        "MONGO_DB": "events-react-dev",
+        "FRONTEND_URL": "http://localhost:3000"
+    }
+}
