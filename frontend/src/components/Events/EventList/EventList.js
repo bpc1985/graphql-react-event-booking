@@ -8,12 +8,8 @@ const eventList = props => {
     return (
       <EventItem
         key={event._id}
-        eventId={event._id}
-        title={event.title}
-        price={event.price}
-        date={event.date}
-        userId={props.authUserId}
-        creatorId={event.creator._id}
+        currentUser={props.currentUser}
+        event={event}
         onDetail={props.onViewDetail}
       />
     );

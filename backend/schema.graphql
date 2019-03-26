@@ -22,6 +22,10 @@ type User {
   createdEvents: [Event!]
 }
 
+type SuccessMessage {
+  message: String
+}
+
 type AuthData {
   userId: ID!
   token: String!
@@ -41,14 +45,16 @@ input UserInput {
 }
 
 type Query {
+  me: User
 	events: [Event!]!
   bookings: [Booking!]!
-  login(email: String!, password: String!): AuthData!
 }
 
 type Mutation {
-	createEvent(eventInput: EventInput): Event
+  login(email: String!, password: String!): AuthData!
+  logout: SuccessMessage!
   createUser(userInput: UserInput): User
+  createEvent(eventInput: EventInput): Event
   bookEvent(eventId: ID!): Booking!
   cancelBooking(bookingId: ID!): Event!
 }

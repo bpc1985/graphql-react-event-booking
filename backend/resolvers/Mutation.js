@@ -1,4 +1,6 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 const Event = require('../models/event');
 const Booking = require('../models/booking');
 const User = require('../models/user');
@@ -6,6 +8,63 @@ const User = require('../models/user');
 const { transformBooking, transformEvent } = require('./merge');
 
 const mutations = {
+  login: async (parent, { email, password }, context) => {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      throw new Error('User does not exist!');
+    }
+    const isEqual = await bcrypt.compare(password, user.password);
+    if (!isEqual) {
+      throw new Error('Password is incorrect!');
+    }
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      'somesupersecretkey',
+      { expiresIn: '7d' }
+    );
+    // set JWT as a cookie on the response
+    context.response.cookie('token', token, {
+      httpOnly: true, // flags the cookie to be accessible only by web server
+      maxAge: 1000 * 60 * 60 * 24 * 7 // 7 year cookie
+    });
+    return { userId: user.id, token: token, tokenExpiration: 1 };
+  },
+  logout(parent, args, context, info) {
+    context.response.clearCookie('token');
+    return {
+      message: 'Logged out!'
+    };
+  },
+  createUser: async (parent, args, context) => {
+    try {
+      const existingUser = await User.findOne({ email: args.userInput.email });
+      if (existingUser) {
+        throw new Error('User exists already.');
+      }
+      const hashedPassword = await bcrypt.hash(args.userInput.password, 12);
+
+      const user = new User({
+        email: args.userInput.email,
+        password: hashedPassword
+      });
+
+      const result = await user.save();
+      // create JWT
+      const token = jwt.sign(
+        { userId: user.id, email: user.email },
+        'somesupersecretkey',
+        { expiresIn: '7d' }
+      );
+      // set JWT as a cookie on the response
+      context.response.cookie('token', token, {
+        httpOnly: true, // flags the cookie to be accessible only by web server
+        maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days cookie
+      });
+      return { ...result._doc, password: null, _id: result.id };
+    } catch (err) {
+      throw err;
+    }
+  },
   createEvent: async (parent, args, context) => {
     if (!context.request.isAuth) {
       throw new Error('Unauthenticated!');
@@ -32,26 +91,6 @@ const mutations = {
       return createdEvent;
     } catch (err) {
       console.log(err);
-      throw err;
-    }
-  },
-  createUser: async (parent, args) => {
-    try {
-      const existingUser = await User.findOne({ email: args.userInput.email });
-      if (existingUser) {
-        throw new Error('User exists already.');
-      }
-      const hashedPassword = await bcrypt.hash(args.userInput.password, 12);
-
-      const user = new User({
-        email: args.userInput.email,
-        password: hashedPassword
-      });
-
-      const result = await user.save();
-      console.log('test: ', { ...result._doc, password: null, _id: result.id });
-      return { ...result._doc, password: null, _id: result.id };
-    } catch (err) {
       throw err;
     }
   },

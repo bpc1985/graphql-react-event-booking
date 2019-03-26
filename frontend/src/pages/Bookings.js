@@ -1,109 +1,52 @@
 import React, { Component } from 'react';
+import { Query, Mutation } from 'react-apollo';
+import gql from 'graphql-tag';
 
+import PleaseSignIn from '../components/Navigation/PleaseSignIn';
 import Spinner from '../components/Spinner/Spinner';
-import AuthContext from '../context/auth-context';
 import BookingList from '../components/Bookings/BookingList/BookingList';
 import BookingsChart from '../components/Bookings/BookingsChart/BookingsChart';
 import BookingsControls from '../components/Bookings/BookingsControls/BookingsControls';
 
+const ALL_BOOKINGS_QUERY = gql`
+  query ALL_BOOKINGS_QUERY {
+    bookings {
+      _id
+      createdAt
+      event {
+        _id
+        title
+        date
+        price
+      }
+    }
+  }
+`;
+
+const CANCEL_BOOKING_MUTATION = gql`
+  mutation CANCEL_BOOKING_MUTATION($id: ID!) {
+    cancelBooking(bookingId: $id) {
+    _id
+      title
+    }
+  }
+`;
+
 class BookingsPage extends Component {
   state = {
-    isLoading: false,
-    bookings: [],
     outputType: 'list'
   };
 
-  static contextType = AuthContext;
-
-  componentDidMount() {
-    this.fetchBookings();
-  }
-
-  fetchBookings = () => {
-    this.setState({ isLoading: true });
-    const requestBody = {
-      query: `
-          query {
-            bookings {
-              _id
-             createdAt
-             event {
-               _id
-               title
-               date
-               price
-             }
-            }
-          }
-        `
-    };
-
-    fetch('http://localhost:4444', {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + this.context.token
-      }
-    })
-      .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Failed!');
+  deleteBookingHandler = async (callCancelBookingFn, bookingId) => {
+    try {
+      await callCancelBookingFn({
+        variables: {
+          id: bookingId
         }
-        return res.json();
       })
-      .then(resData => {
-        const bookings = resData.data.bookings;
-        this.setState({ bookings: bookings, isLoading: false });
-      })
-      .catch(err => {
-        console.log(err);
-        this.setState({ isLoading: false });
-      });
-  };
-
-  deleteBookingHandler = bookingId => {
-    this.setState({ isLoading: true });
-    const requestBody = {
-      query: `
-          mutation CancelBooking($id: ID!) {
-            cancelBooking(bookingId: $id) {
-            _id
-             title
-            }
-          }
-        `,
-      variables: {
-        id: bookingId
-      }
-    };
-
-    fetch('http://localhost:4444', {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + this.context.token
-      }
-    })
-      .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Failed!');
-        }
-        return res.json();
-      })
-      .then(resData => {
-        this.setState(prevState => {
-          const updatedBookings = prevState.bookings.filter(booking => {
-            return booking._id !== bookingId;
-          });
-          return { bookings: updatedBookings, isLoading: false };
-        });
-      })
-      .catch(err => {
-        console.log(err);
-        this.setState({ isLoading: false });
-      });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   changeOutputTypeHandler = outputType => {
@@ -115,28 +58,42 @@ class BookingsPage extends Component {
   };
 
   render() {
-    let content = <Spinner />;
-    if (!this.state.isLoading) {
-      content = (
-        <React.Fragment>
-          <BookingsControls
-            activeOutputType={this.state.outputType}
-            onChange={this.changeOutputTypeHandler}
-          />
-          <div>
-            {this.state.outputType === 'list' ? (
-              <BookingList
-                bookings={this.state.bookings}
-                onDelete={this.deleteBookingHandler}
-              />
-            ) : (
-              <BookingsChart bookings={this.state.bookings} />
-            )}
-          </div>
-        </React.Fragment>
-      );
-    }
-    return <React.Fragment>{content}</React.Fragment>;
+    return (
+      <PleaseSignIn>
+        <Query query={ALL_BOOKINGS_QUERY}>
+          {({data, loading, error}) => {
+            if (loading) return <Spinner />;
+            if (error) return <p>Error: {error.message}</p>;
+            return (
+              <Mutation
+                mutation={CANCEL_BOOKING_MUTATION}
+                refetchQueries={[
+                  {query: ALL_BOOKINGS_QUERY}
+                ]}>
+                {(callCancelBookingFn, {loading, error}) => (
+                  <React.Fragment>
+                    <BookingsControls
+                      activeOutputType={this.state.outputType}
+                      onChange={this.changeOutputTypeHandler}
+                    />
+                    <div>
+                      {this.state.outputType === 'list' ? (
+                        <BookingList
+                          bookings={data.bookings}
+                          onDelete={(bookingId) => this.deleteBookingHandler(callCancelBookingFn, bookingId)}
+                        />
+                      ) : (
+                        <BookingsChart bookings={data.bookings} />
+                      )}
+                    </div>
+                  </React.Fragment>
+                )}
+              </Mutation>
+            );
+          }}
+        </Query>
+      </PleaseSignIn>
+    );
   }
 }
 

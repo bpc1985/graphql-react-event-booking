@@ -1,23 +1,26 @@
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const createServer = require('./createServer');
 
 const server = createServer();
+server.express.use(cookieParser());
 server.express.use(bodyParser.json());
 
 // decode the JWT so we can get the user Id on each request
 server.express.use((req, res, next) => {
-  const authHeader = req.get('Authorization');
-  if (!authHeader) {
+  const token =
+    req.body.token ||
+    req.query.token ||
+    req.headers['x-access-token'] ||
+    req.cookies.token;
+
+  if (!token) {
     req.isAuth = false;
     return next();
   }
-  const token = authHeader.split(' ')[1];
-  if (!token || token === '') {
-    req.isAuth = false;
-    return next();
-  }
+
   let decodedToken;
   try {
     decodedToken = jwt.verify(token, 'somesupersecretkey');

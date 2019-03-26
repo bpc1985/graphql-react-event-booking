@@ -1,14 +1,33 @@
 import React, { Component } from 'react';
+import { Mutation } from 'react-apollo';
+import gql from 'graphql-tag';
 
 import './Auth.css';
-import AuthContext from '../context/auth-context';
+import {CURRENT_USER_QUERY} from '../components/Navigation/User';
+
+const LOGIN_MUTATION = gql`
+  mutation LOGIN_MUTATION ($email: String!, $password: String!) {
+    login(email: $email, password: $password) {
+      userId
+      token
+      tokenExpiration
+    }
+  }
+`;
+
+const CREATE_USER_MUTATION = gql`
+  mutation CREATE_USER_MUTATION ($email: String!, $password: String!) {
+    createUser(userInput: {email: $email, password: $password}) {
+      _id
+      email
+    }
+  }
+`;
 
 class AuthPage extends Component {
   state = {
     isLogin: true
   };
-
-  static contextType = AuthContext;
 
   constructor(props) {
     super(props);
@@ -22,7 +41,7 @@ class AuthPage extends Component {
     });
   };
 
-  submitHandler = event => {
+  submitHandler = async (event, callLoginFn, callCreateUserFn) => {
     event.preventDefault();
     const email = this.emailEl.current.value;
     const password = this.passwordEl.current.value;
@@ -31,84 +50,61 @@ class AuthPage extends Component {
       return;
     }
 
-    let requestBody = {
-      query: `
-        query Login($email: String!, $password: String!) {
-          login(email: $email, password: $password) {
-            userId
-            token
-            tokenExpiration
-          }
-        }
-      `,
-      variables: {
-        email: email,
-        password: password
-      }
-    };
-
-    if (!this.state.isLogin) {
-      requestBody = {
-        query: `
-          mutation CreateUser($email: String!, $password: String!) {
-            createUser(userInput: {email: $email, password: $password}) {
-              _id
-              email
-            }
-          }
-        `,
+    try {
+      const callFn = this.state.isLogin ? callLoginFn : callCreateUserFn;
+      const res = await callFn({
         variables: {
-          email: email,
-          password: password
+          email,
+          password
         }
-      };
-    }
-
-    fetch('http://localhost:4444', {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Failed!');
-        }
-        return res.json();
-      })
-      .then(resData => {
-        if (resData.data.login.token) {
-          this.context.login(
-            resData.data.login.token,
-            resData.data.login.userId,
-            resData.data.login.tokenExpiration
-          );
-        }
-      })
-      .catch(err => {
-        console.log(err);
       });
+      if (res.data.createUser && res.data.createUser._id) {
+        this.props.history.push('/');
+      }
+      else if (res.data.login.token) {
+        if (this.props.location && this.props.location.pathname === '/auth') {
+          this.props.history.push('/');
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   render() {
     return (
-      <form className="auth-form" onSubmit={this.submitHandler}>
-        <div className="form-control">
-          <label htmlFor="email">E-Mail</label>
-          <input type="email" id="email" ref={this.emailEl} />
-        </div>
-        <div className="form-control">
-          <label htmlFor="password">Password</label>
-          <input type="password" id="password" ref={this.passwordEl} />
-        </div>
-        <div className="form-actions">
-          <button type="submit">Submit</button>
-          <button type="button" onClick={this.switchModeHandler}>
-            Switch to {this.state.isLogin ? 'Signup' : 'Login'}
-          </button>
-        </div>
-      </form>
+      <Mutation
+        mutation={LOGIN_MUTATION}
+        refetchQueries={[
+          {query: CURRENT_USER_QUERY}
+        ]}>
+      {(callLoginFn) => (
+        <Mutation
+          mutation={CREATE_USER_MUTATION}
+          refetchQueries={[
+            {query: CURRENT_USER_QUERY}
+          ]}>
+          {(callCreateUserFn) => (
+            <form className="auth-form" onSubmit={(e) => this.submitHandler(e, callLoginFn, callCreateUserFn)}>
+              <div className="form-control">
+                <label htmlFor="email">E-Mail</label>
+                <input type="email" id="email" ref={this.emailEl} />
+              </div>
+              <div className="form-control">
+                <label htmlFor="password">Password</label>
+                <input type="password" id="password" ref={this.passwordEl} />
+              </div>
+              <div className="form-actions">
+                <button type="submit">Submit</button>
+                <button type="button" onClick={this.switchModeHandler}>
+                  Switch to {this.state.isLogin ? 'Signup' : 'Login'}
+                </button>
+              </div>
+            </form>
+          )}
+        </Mutation>
+      )}
+      </Mutation>
     );
   }
 }
