@@ -37,12 +37,11 @@ server.express.use((req, res, next) => {
   next();
 });
 
+const { MONGO_USER, MONGO_PASSWORD, MONGO_URL, MONGO_DB } = process.env;
+const connectionString = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_URL}/${MONGO_DB}`;
+
 mongoose
-  .connect(
-    `mongodb+srv://${process.env.MONGO_USER}:${
-      process.env.MONGO_PASSWORD
-    }@cluster0-mqpf6.mongodb.net/${process.env.MONGO_DB}?retryWrites=true`
-  )
+  .connect(connectionString)
   .then(() => {
     server.start({
       cors: {

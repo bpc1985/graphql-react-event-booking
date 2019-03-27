@@ -57,9 +57,9 @@
   integrity sha512-FwI9gX75FgVBJ7ywgnq/P7tw+/o1GUbtP0KzbtusLigAOgIgNISRK0ZPl4qertvXSIE8YbsVJueQ90cDt9YYyw==
 
 "@types/node@*":
-  version "11.11.7"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-11.11.7.tgz#f1c35a906b82adae76ede5ab0d2088e58fa37843"
-  integrity sha512-bHbRcyD6XpXVLg42QYaQCjvDXaCFkvb3WbCIxSDmhGbJYVroxvYzekk9QGg1beeIawfvSLkdZpP0h7jxE4ihnA==
+  version "11.12.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-11.12.0.tgz#ec5594728811dc2797e42396cfcdf786f2052c12"
+  integrity sha512-Lg00egj78gM+4aE0Erw05cuDbvX9sLJbaaPwwRtdCdAMnIudqrQZ0oZX98Ek0yiSK/A2nubHgJfvII/rTT2Dwg==
 
 "@types/range-parser@*":
   version "1.2.3"
@@ -272,9 +272,9 @@ aws-lambda@^0.1.2:
     dotenv "^0.4.0"
 
 aws-sdk@^*:
-  version "2.428.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.428.0.tgz#9de2cc986f6fb2b011e0a86a10e415e1e935a2bb"
-  integrity sha512-gHEt62n66+cMp8Gc3S8D2dJ63SmnOArpPXvFhnZijbHOeRwsEI1J0HfHtvtWMcD/K6t5HNanvD7RVWBZU5lOmg==
+  version "2.429.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.429.0.tgz#27c32734f6473f69a39c29a694d54d15b5beb68a"
+  integrity sha512-8RmRyCXYjDC15BQlkkgT5Yqs8GAdPmjaLRP03Lc6kqaKuMMIi4EnNIlXDKi9kwj3zl2AXfm0GE5blcE0+ZfaxQ==
   dependencies:
     buffer "4.9.1"
     events "1.1.1"
@@ -571,7 +571,7 @@ content-type@~1.0.4:
   resolved "https://registry.yarnpkg.com/content-type/-/content-type-1.0.4.tgz#e138cc75e040c727b1966fe5e5f8c9aee256fe3b"
   integrity sha512-hIP3EEPs8tB9AT1L+NUqtwOAps4mk2Zob89MWXMHjHWg9milF/j4osnnQLXBCBFBk/tvIG/tUc9mOUJiPBhPXA==
 
-cookie-parser@^1.4.3:
+cookie-parser@^1.4.4:
   version "1.4.4"
   resolved "https://registry.yarnpkg.com/cookie-parser/-/cookie-parser-1.4.4.tgz#e6363de4ea98c3def9697b93421c09f30cf5d188"
   integrity sha512-lo13tqF3JEtFO7FyA49CqbhaFkskRJ0u/UAiINgrIXeRCY41c88/zxtrECl8AKH3B0hj9q10+h3Kt8I7KlW4tw==
@@ -1115,9 +1115,9 @@ graphql-yoga@^1.17.4:
     subscriptions-transport-ws "^0.9.8"
 
 "graphql@^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0", graphql@^14.0.2:
-  version "14.1.1"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-14.1.1.tgz#d5d77df4b19ef41538d7215d1e7a28834619fac0"
-  integrity sha512-C5zDzLqvfPAgTtP8AUPIt9keDabrdRAqSWjj2OPRKrKxI9Fb65I36s1uCs1UUBFnSWTdO7hyHi7z1ZbwKMKF6Q==
+  version "14.2.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-14.2.0.tgz#ff25813ad6d186f3975977d56bc2d2434871f3b9"
+  integrity sha512-dlFHRtxsL4sBy1C1e3v64IUd5ndZhAOHZ/z3Dr4Nm6+cvr9elrnz4BhMF9h9mRBBnhUCGLc4GH4xvPbKG6sUeA==
   dependencies:
     iterall "^1.2.2"
 
@@ -1203,9 +1203,9 @@ ieee754@1.1.8:
   integrity sha1-vjPUCsEO8ZJnAfbwii2G+/0a0+Q=
 
 ieee754@^1.1.4:
-  version "1.1.12"
-  resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.1.12.tgz#50bf24e5b9c8bb98af4964c941cdb0918da7b60b"
-  integrity sha512-GguP+DRY+pJ3soyIiGPTvdiVXjZ+DbXOxGpXn3eMvNW4x4irjqXm4wHKscC+TfxSJ0yw/S1F24tqdMNsMZTiLA==
+  version "1.1.13"
+  resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.1.13.tgz#ec168558e95aa181fd87d37f55c32bbcb6708b84"
+  integrity sha512-4vf7I2LYV/HaWerSo3XmlMkp5eZ83i+/CDluXi/IGTs/O1sejBNhTtnxzmRZfvOUqj7lZjqHkeTvpgSFDlWZTg==
 
 ignore-by-default@^1.0.1:
   version "1.0.1"
@@ -2243,9 +2243,9 @@ semver-diff@^2.0.0:
     semver "^5.0.3"
 
 semver@^5.0.3, semver@^5.1.0, semver@^5.3.0, semver@^5.5.0, semver@^5.6.0:
-  version "5.6.0"
-  resolved "https://registry.yarnpkg.com/semver/-/semver-5.6.0.tgz#7e74256fbaa49c75aa7c7a205cc22799cac80004"
-  integrity sha512-RS9R6R35NYgQn++fkDWaOmqGoj4Ek9gGs+DPxNUZKuwE183xjJroKvyo1IzVFeXvUrvmALy6FWD5xrdJT25gMg==
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-5.7.0.tgz#790a7cf6fea5459bac96110b29b60412dc8ff96b"
+  integrity sha512-Ya52jSX2u7QKghxeoFGpLwCtGlt7j0oY9DYb5apt9nPlJ42ID+ulTXESnt/qAQcoSERyZ5sl3LDIOw0nAn/5DA==
 
 send@0.16.2:
   version "0.16.2"
