@@ -12,12 +12,13 @@ const eventItem = ({currentUser, event, onDetail}) => (
     </div>
     <div>
       {currentUser && (currentUser._id === event.creator._id) ? (
-        <p>Your the owner of this event.</p>
+        <span>Owner of this event </span>
       ) : (
-        <button className="btn" onClick={() => {onDetail(event)}}>
-          View Details
-        </button>
+        null
       )}
+      <button className="btn" onClick={() => {onDetail(event)}}>
+        View Details
+      </button>
     </div>
   </li>
 );

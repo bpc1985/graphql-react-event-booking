@@ -1,6 +1,9 @@
-const { GraphQLServer } = require('graphql-yoga');
+const { GraphQLServer, PubSub } = require('graphql-yoga');
 const Mutation = require('./resolvers/Mutation');
 const Query = require('./resolvers/Query');
+const Subscription = require('./resolvers/Subscription');
+
+const pubsub = new PubSub();
 
 // Create the GraphQL Yoga Server
 function createServer() {
@@ -8,9 +11,10 @@ function createServer() {
     typeDefs: 'schema.graphql',
     resolvers: {
       Mutation,
-      Query
+      Query,
+      Subscription
     },
-    context: req => ({ ...req })
+    context: req => ({ ...req, pubsub })
   });
 }
 

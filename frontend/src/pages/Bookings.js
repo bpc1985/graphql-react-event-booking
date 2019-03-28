@@ -26,8 +26,27 @@ const ALL_BOOKINGS_QUERY = gql`
 const CANCEL_BOOKING_MUTATION = gql`
   mutation CANCEL_BOOKING_MUTATION($id: ID!) {
     cancelBooking(bookingId: $id) {
-    _id
+      _id
       title
+    }
+  }
+`;
+
+const CREATE_BOOKING_SUBSCRIPTION = gql`
+  subscription CREATE_BOOKING_SUBSCRIPTION {
+    subscriptionBookingAdded {
+      _id,
+      createdAt
+      event {
+        _id
+        title
+        date
+        price
+      }
+      user {
+        _id
+        email
+      }
     }
   }
 `;
@@ -57,13 +76,34 @@ class BookingsPage extends Component {
     }
   };
 
+  _subscribeToNewBooking = subscribeToMore => {
+    subscribeToMore({
+      document: CREATE_BOOKING_SUBSCRIPTION,
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) {
+          return prev;
+        }
+        const newBooking = subscriptionData.data.subscriptionBookingAdded;
+        const exists = prev.bookings.find(booking => booking._id === newBooking._id);
+        if (exists) {
+          return prev;
+        }
+        return Object.assign({}, prev, {
+          bookings: prev.bookings.concat(newBooking)
+        });
+      }
+    });
+  }
+
   render() {
     return (
       <PleaseSignIn>
         <Query query={ALL_BOOKINGS_QUERY}>
-          {({data, loading, error}) => {
+          {({data, loading, error, subscribeToMore}) => {
             if (loading) return <Spinner />;
             if (error) return <p>Error: {error.message}</p>;
+            this._subscribeToNewBooking(subscribeToMore);
+
             return (
               <Mutation
                 mutation={CANCEL_BOOKING_MUTATION}

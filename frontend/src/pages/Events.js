@@ -47,6 +47,38 @@ const CREATE_EVENT_MUTATION = gql`
   }
 `;
 
+const DELETE_EVENT_MUTATION = gql`
+  mutation DELETE_EVENT_MUTATION ($id: ID!) {
+    deleteEvent(eventId: $id) {
+      message
+    }
+  }
+`;
+
+const CREATE_EVENT_SUBSCRIPTION = gql`
+  subscription CREATE_EVENT_SUBSCRIPTION {
+    subscriptionEventAdded {
+      _id
+      title
+      description
+      date
+      price
+      creator {
+        _id
+        email
+      }
+    }
+  }
+`;
+
+const DELETE_EVENT_SUBSCRIPTION = gql`
+  subscription DELETE_EVENT_SUBSCRIPTION {
+    subscriptionEventDeleted {
+      _id
+    }
+  }
+`;
+
 class EventsPage extends Component {
   state = {
     creating: false,
@@ -103,6 +135,19 @@ class EventsPage extends Component {
     this.setState({ selectedEvent: event });
   };
 
+  deleteEventHandler = async (callDeleteEventFn, me) => {
+    if (!me || !me._id) {
+      this.setState({ selectedEvent: null });
+      return;
+    }
+    try {
+      await callDeleteEventFn();
+      this.setState({ selectedEvent: null });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   bookEventHandler = async (callBookEventFn, me) => {
     if (!me || !me._id) {
       this.setState({ selectedEvent: null });
@@ -116,12 +161,53 @@ class EventsPage extends Component {
     }
   };
 
+  _subscribeToNewEvent = subscribeToMore => {
+    subscribeToMore({
+      document: CREATE_EVENT_SUBSCRIPTION,
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) {
+          return prev;
+        }
+        const newEvent = subscriptionData.data.subscriptionEventAdded;
+        const exists = prev.events.find(event => event._id === newEvent._id);
+        if (exists) {
+          return prev;
+        }
+        return Object.assign({}, prev, {
+          events: prev.events.concat(newEvent)
+        });
+      }
+    });
+  }
+
+  _subscribeToDeletedEvent = subscribeToMore => {
+    subscribeToMore({
+      document: DELETE_EVENT_SUBSCRIPTION,
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) {
+          return prev;
+        }
+        const deletedEventId = subscriptionData.data.subscriptionEventDeleted._id;
+        const exists = prev.events.find(event => event._id === deletedEventId);
+        if (exists) {
+          return Object.assign({}, prev, {
+            events: prev.events.filter(event => event._id !== deletedEventId)
+          });
+        }
+        return prev;
+      }
+    });
+  }
+
   render() {
     return (
       <Query query={ALL_EVENTS_QUERY}>
-        {({ data, error, loading }) => {
+        {({ data, error, loading, subscribeToMore }) => {
           if (loading) return <Spinner />;
           if (error) return <p>Error: {error.message}</p>;
+          this._subscribeToNewEvent(subscribeToMore);
+          this._subscribeToDeletedEvent(subscribeToMore);
+
           return (
             <User>
               {({data: {me}}) => (
@@ -135,6 +221,7 @@ class EventsPage extends Component {
                       ]}>
                       {(callCreateEventFn, {loading, error}) => (
                         <Modal
+                          me={me}
                           title="Add Event"
                           canCancel
                           canConfirm
@@ -170,22 +257,35 @@ class EventsPage extends Component {
                   )}
                   {this.state.selectedEvent && (
                     <Mutation mutation={BOOK_EVENT_MUTATION} variables={{id: this.state.selectedEvent._id}}>
-                      {(callBookEventFn, {loading, error}) => (
-                        <Modal
-                          title={this.state.selectedEvent.title}
-                          canCancel
-                          canConfirm
-                          onCancel={this.modalCancelHandler}
-                          onConfirm={() => {this.bookEventHandler(callBookEventFn, me)}}
-                          confirmText={!!me ? 'Book' : 'Confirm'}
-                        >
-                          <h1>{this.state.selectedEvent.title}</h1>
-                          <h2>
-                            ${this.state.selectedEvent.price} -{' '}
-                            {new Date(this.state.selectedEvent.date).toLocaleDateString()}
-                          </h2>
-                          <p>{this.state.selectedEvent.description}</p>
-                        </Modal>
+                      {(callBookEventFn) => (
+                        <Mutation
+                          mutation={DELETE_EVENT_MUTATION}
+                          variables={{id: this.state.selectedEvent._id}}
+                          refetchQueries={[
+                            {query: ALL_EVENTS_QUERY}
+                          ]}>
+                          {(callDeleteEventFn) => (
+                            <Modal
+                              me={me}
+                              title={this.state.selectedEvent.title}
+                              event={this.state.selectedEvent}
+                              canCancel
+                              canDelete
+                              canConfirm
+                              onCancel={this.modalCancelHandler}
+                              onDelete={() => this.deleteEventHandler(callDeleteEventFn, me)}
+                              onConfirm={() => {this.bookEventHandler(callBookEventFn, me)}}
+                              confirmText={!!me ? 'Book' : 'Confirm'}
+                            >
+                              <h1>{this.state.selectedEvent.title}</h1>
+                              <h2>
+                                ${this.state.selectedEvent.price} -{' '}
+                                {new Date(this.state.selectedEvent.date).toLocaleDateString()}
+                              </h2>
+                              <p>{this.state.selectedEvent.description}</p>
+                            </Modal>
+                          )}
+                        </Mutation>
                       )}
                     </Mutation>
                   )}

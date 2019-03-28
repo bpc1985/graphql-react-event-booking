@@ -6,6 +6,11 @@ const Booking = require('../models/booking');
 const User = require('../models/user');
 
 const { transformBooking, transformEvent } = require('./merge');
+const {
+  EVENT_ADDED_TOPIC,
+  EVENT_DELETED_TOPIC,
+  BOOKING_ADDED_TOPIC
+} = require('./constants');
 
 const mutations = {
   login: async (parent, { email, password }, context) => {
@@ -87,12 +92,28 @@ const mutations = {
       }
       creator.createdEvents.push(event);
       await creator.save();
-
+      context.pubsub.publish(EVENT_ADDED_TOPIC, {subscriptionEventAdded: createdEvent});
       return createdEvent;
     } catch (err) {
       console.log(err);
       throw err;
     }
+  },
+  deleteEvent: async (parent, args, context) => {
+    if (!context.request.isAuth) {
+      throw new Error('Unauthenticated!');
+    }
+
+    const creator = await User.findById(context.request.userId);
+    creator.createdEvents = creator.createdEvents.filter(eventId => eventId != args.eventId);
+    await creator.save();
+    const fetchedEvent = await Event.findById(args.eventId);
+    await fetchedEvent.remove();
+    context.pubsub.publish(EVENT_DELETED_TOPIC, {subscriptionEventDeleted: fetchedEvent});
+
+    return {
+      message: `Event ${args.eventId} has been deleted!`
+    };
   },
   bookEvent: async (parent, args, context) => {
     if (!context.request.isAuth) {
@@ -101,10 +122,12 @@ const mutations = {
     const fetchedEvent = await Event.findOne({ _id: args.eventId });
     const booking = new Booking({
       user: context.request.userId,
-      event: fetchedEvent
+      event: fetchedEvent._id
     });
     const result = await booking.save();
-    return transformBooking(result);
+    const createdBooking = transformBooking(result);
+    context.pubsub.publish(BOOKING_ADDED_TOPIC, {subscriptionBookingAdded: createdBooking});
+    return createdBooking;
   },
   cancelBooking: async (parent, args, context) => {
     if (!context.request.isAuth) {

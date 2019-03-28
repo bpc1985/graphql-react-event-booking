@@ -55,6 +55,13 @@ type Mutation {
   logout: SuccessMessage!
   createUser(userInput: UserInput): User
   createEvent(eventInput: EventInput): Event
+  deleteEvent(eventId: ID!): SuccessMessage!
   bookEvent(eventId: ID!): Booking!
   cancelBooking(bookingId: ID!): Event!
+}
+
+type Subscription {
+  subscriptionEventAdded: Event!
+  subscriptionEventDeleted: Event!
+  subscriptionBookingAdded: Booking!
 }
