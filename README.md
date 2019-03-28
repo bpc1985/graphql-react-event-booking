@@ -2,7 +2,7 @@
 
 This project is originated from [Academind GraphQL Demo Code](https://github.com/academind/yt-graphql-react-event-booking-api/) and casted in [Youtube channel.](https://www.youtube.com/watch?v=7giZGFDGnkc&list=PL55RiY5tL51rG1x02Yyj93iypUuHYXcB_&index=1)
 
-However, code examples used in that project are quite basic for beginner. Therefore, I decide to add more features such as real-time subscription for adding, delateing and convert it by using
+However, code examples used in that project are quite basic for beginner. Therefore, I decide to add more features such as real-time subscription for adding, deleting Event, Booking and then convert it by using
 - Backend: GraphQL & GraphQL Yoga
 - Frontend: ReactJS & Apollo Client
 
