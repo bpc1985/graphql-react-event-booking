@@ -51,6 +51,14 @@ const CREATE_BOOKING_SUBSCRIPTION = gql`
   }
 `;
 
+const DELETED_BOOKING_SUBSCRIPTION = gql`
+  subscription DELETED_BOOKING_SUBSCRIPTION {
+    subscriptionBookingsDeleted {
+      _id
+    }
+  }
+`;
+
 class BookingsPage extends Component {
   state = {
     outputType: 'list'
@@ -95,6 +103,25 @@ class BookingsPage extends Component {
     });
   }
 
+  _subscribeToDeletedBookings = subscribeToMore => {
+    subscribeToMore({
+      document: DELETED_BOOKING_SUBSCRIPTION,
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) {
+          return prev;
+        }
+        const deletedBookingIds = subscriptionData.data.subscriptionBookingsDeleted;
+        if (deletedBookingIds === undefined || deletedBookingIds.length === 0) {
+          return prev;
+        }
+        const ids = deletedBookingIds.map(b => b._id);
+        return Object.assign({}, prev, {
+          bookings: prev.bookings.filter(booking => !ids.includes(booking._id))
+        });
+      }
+    });
+  }
+
   render() {
     return (
       <PleaseSignIn>
@@ -103,6 +130,7 @@ class BookingsPage extends Component {
             if (loading) return <Spinner />;
             if (error) return <p>Error: {error.message}</p>;
             this._subscribeToNewBooking(subscribeToMore);
+            this._subscribeToDeletedBookings(subscribeToMore);
 
             return (
               <Mutation

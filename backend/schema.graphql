@@ -64,4 +64,5 @@ type Subscription {
   subscriptionEventAdded: Event!
   subscriptionEventDeleted: Event!
   subscriptionBookingAdded: Booking!
+  subscriptionBookingsDeleted: [Booking]
 }

@@ -9,7 +9,8 @@ const { transformBooking, transformEvent } = require('./merge');
 const {
   EVENT_ADDED_TOPIC,
   EVENT_DELETED_TOPIC,
-  BOOKING_ADDED_TOPIC
+  BOOKING_ADDED_TOPIC,
+  BOOKINGS_DELETED_TOPIC
 } = require('./constants');
 
 const mutations = {
@@ -107,9 +108,16 @@ const mutations = {
     const creator = await User.findById(context.request.userId);
     creator.createdEvents = creator.createdEvents.filter(eventId => eventId != args.eventId);
     await creator.save();
+
     const fetchedEvent = await Event.findById(args.eventId);
     await fetchedEvent.remove();
+
+    const bookings = await Booking.find({event: fetchedEvent});
+    const bookingIDs = bookings.map(booking => booking._id);
+    await Booking.deleteMany({ _id: { $in: bookingIDs }});
+
     context.pubsub.publish(EVENT_DELETED_TOPIC, {subscriptionEventDeleted: fetchedEvent});
+    context.pubsub.publish(BOOKINGS_DELETED_TOPIC, {subscriptionBookingsDeleted: bookings});
 
     return {
       message: `Event ${args.eventId} has been deleted!`

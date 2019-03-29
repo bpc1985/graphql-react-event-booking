@@ -34,6 +34,11 @@
   margin: 0 1rem;
 }
 
+.main-navigation__items li span {
+  color: #dfcefc;
+  margin-right: 40px;
+}
+
 .main-navigation__items a,
 .main-navigation__items button {
   text-decoration: none;

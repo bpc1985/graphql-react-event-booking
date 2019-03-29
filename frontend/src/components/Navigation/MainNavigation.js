@@ -14,6 +14,7 @@ const mainNavigation = props => (
       {({data: {me}}) => (
         <ul>
           <li>
+            { me && <span>{me.email}</span> }
             <NavLink to="/events">Events</NavLink>
           </li>
           {!me
