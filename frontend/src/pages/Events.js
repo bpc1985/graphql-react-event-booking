@@ -7,6 +7,7 @@ import Backdrop from '../components/Backdrop/Backdrop';
 import EventList from '../components/Events/EventList/EventList';
 import Spinner from '../components/Spinner/Spinner';
 import User from '../components/Navigation/User';
+import ImageUpload from '../components/ImageUpload/ImageUpload';
 import './Events.css';
 
 const ALL_EVENTS_QUERY = gql`
@@ -17,6 +18,7 @@ const ALL_EVENTS_QUERY = gql`
       description
       date
       price
+      image
       creator {
         _id
         email
@@ -36,13 +38,14 @@ const BOOK_EVENT_MUTATION = gql`
 `;
 
 const CREATE_EVENT_MUTATION = gql`
-  mutation CREATE_EVENT_MUTATION ($title: String!, $description: String!, $price: Float!, $date: String!) {
-    createEvent(eventInput: {title: $title, description: $description, price: $price, date: $date}) {
+  mutation CREATE_EVENT_MUTATION ($title: String!, $description: String!, $price: Float!, $date: String!, $image: String) {
+    createEvent(eventInput: {title: $title, description: $description, price: $price, date: $date, image: $image}) {
       _id
       title
       description
       date
       price
+      image
     }
   }
 `;
@@ -63,6 +66,7 @@ const CREATE_EVENT_SUBSCRIPTION = gql`
       description
       date
       price
+      image
       creator {
         _id
         email
@@ -82,7 +86,7 @@ const DELETE_EVENT_SUBSCRIPTION = gql`
 class EventsPage extends Component {
   state = {
     creating: false,
-    selectedEvent: null
+    selectedEvent: null,
   };
 
   constructor(props) {
@@ -91,6 +95,24 @@ class EventsPage extends Component {
     this.priceElRef = React.createRef();
     this.dateElRef = React.createRef();
     this.descriptionElRef = React.createRef();
+    this.selectedPhoto = null;
+  }
+
+  _setSelectedPhoto = photoFile => {
+    this.selectedPhoto = photoFile;
+  }
+
+  _uploadPhoto = async (file) => {
+    const data = new FormData();
+    data.append('file', file);
+    data.append('upload_preset', 'easyevent');
+
+    const res = await fetch('https://api.cloudinary.com/v1_1/bpc1985/image/upload', {
+      method: 'POST',
+      body: data
+    });
+    const uploadedFile = await res.json();
+    return uploadedFile.secure_url;
   }
 
   startCreateEventHandler = () => {
@@ -103,6 +125,7 @@ class EventsPage extends Component {
     const price = +this.priceElRef.current.value;
     const date = this.dateElRef.current.value;
     const description = this.descriptionElRef.current.value;
+    let photoUrl = undefined;
 
     if (
       title.trim().length === 0 ||
@@ -113,13 +136,19 @@ class EventsPage extends Component {
       return;
     }
 
+    if (this.selectedPhoto) {
+      photoUrl = await this._uploadPhoto(this.selectedPhoto);
+      console.log('photoUrl: ', photoUrl);
+    }
+
     try {
       await callCreateEventFn({
         variables: {
           title,
           description,
           price,
-          date
+          date,
+          image: photoUrl
         }
       });
     } catch (err) {
@@ -250,6 +279,12 @@ class EventsPage extends Component {
                                 ref={this.descriptionElRef}
                               />
                             </div>
+                            <div className="form-control">
+                              <label htmlFor="file">Photo</label>
+                              <ImageUpload
+                                id="photo"
+                                setSelectedPhoto={this._setSelectedPhoto} />
+                            </div>
                           </form>
                         </Modal>
                       )}
@@ -283,6 +318,8 @@ class EventsPage extends Component {
                                 {new Date(this.state.selectedEvent.date).toLocaleDateString()}
                               </h2>
                               <p>{this.state.selectedEvent.description}</p>
+                              {this.state.selectedEvent.image &&
+                                <img src={this.state.selectedEvent.image} width="450px" height="200px" alt="Preview" />}
                             </Modal>
                           )}
                         </Mutation>

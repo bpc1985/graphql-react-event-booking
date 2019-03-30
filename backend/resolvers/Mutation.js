@@ -80,6 +80,7 @@ const mutations = {
       description: args.eventInput.description,
       price: +args.eventInput.price,
       date: new Date(args.eventInput.date),
+      image: args.eventInput.image,
       creator: context.request.userId
     });
     let createdEvent;

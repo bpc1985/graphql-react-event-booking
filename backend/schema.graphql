@@ -12,6 +12,7 @@ type Event {
   description: String!
   price: Float!
   date: String!
+  image: String
   creator: User!
 }
 
@@ -37,6 +38,7 @@ input EventInput {
   description: String!
   price: Float!
   date: String!
+  image: String
 }
 
 input UserInput {
@@ -46,7 +48,7 @@ input UserInput {
 
 type Query {
   me: User
-	events: [Event!]!
+  events: [Event!]!
   bookings: [Booking!]!
 }
 
