@@ -15,6 +15,7 @@ import BookingsPage from './pages/Bookings';
 import EventsPage from './pages/Events';
 import MainNavigation from './components/Navigation/MainNavigation';
 
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
 /*

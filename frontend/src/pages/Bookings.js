@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Query, Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
+import { toast } from 'react-toastify';
 
 import PleaseSignIn from '../components/Navigation/PleaseSignIn';
 import Spinner from '../components/Spinner/Spinner';
@@ -70,7 +71,11 @@ class BookingsPage extends Component {
         variables: {
           id: bookingId
         }
-      })
+      });
+      toast.warn("You have already cancelled this event!", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 1500
+      });
     } catch (err) {
       console.log(err);
     }

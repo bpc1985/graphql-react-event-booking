@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Query, Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
+import { toast } from 'react-toastify';
 
 import Modal from '../components/Modal/Modal';
 import Backdrop from '../components/Backdrop/Backdrop';
@@ -121,6 +122,10 @@ class EventsPage extends Component {
 
   modalConfirmHandler = async (callCreateEventFn) => {
     this.setState({ creating: false });
+    toast("Your event has been created successfully!", {
+      position: toast.POSITION.TOP_RIGHT
+    });
+
     const title = this.titleElRef.current.value;
     const price = +this.priceElRef.current.value;
     const date = this.dateElRef.current.value;
@@ -138,7 +143,6 @@ class EventsPage extends Component {
 
     if (this.selectedPhoto) {
       photoUrl = await this._uploadPhoto(this.selectedPhoto);
-      console.log('photoUrl: ', photoUrl);
     }
 
     try {
@@ -172,6 +176,10 @@ class EventsPage extends Component {
     try {
       await callDeleteEventFn();
       this.setState({ selectedEvent: null });
+      toast("Your event has been deleted successfully!", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 1500
+      });
     } catch (err) {
       console.log(err);
     }
@@ -185,6 +193,10 @@ class EventsPage extends Component {
     try {
       await callBookEventFn();
       this.setState({ selectedEvent: null });
+      toast.info("You booked this event successfully!", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 1500
+      });
     } catch (err) {
       console.log(err);
     }

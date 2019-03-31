@@ -37,7 +37,6 @@ Modal.propTypes = {
   me: PropTypes.object,
   title: PropTypes.string,
   event: PropTypes.object,
-  children: PropTypes.array.isRequired,
   canCancel: PropTypes.bool,
   onCancel: PropTypes.func,
   canDelete: PropTypes.bool,
