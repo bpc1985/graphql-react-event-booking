@@ -11,7 +11,7 @@ const LOGOUT_MUTATION = gql`
   }
 `;
 
-const Logout = props => (
+const Logout = () => (
   <Mutation
     mutation={LOGOUT_MUTATION}
     refetchQueries={[

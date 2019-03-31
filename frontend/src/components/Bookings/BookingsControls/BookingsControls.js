@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import './BookingsControls.css';
 
-const bookingsControl = props => {
+const BookingsControl = props => {
   return (
     <div className="bookings-control">
       <button
@@ -21,4 +22,9 @@ const bookingsControl = props => {
   );
 };
 
-export default bookingsControl;
+BookingsControl.propTypes = {
+  activeOutputType: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired
+}
+
+export default BookingsControl;

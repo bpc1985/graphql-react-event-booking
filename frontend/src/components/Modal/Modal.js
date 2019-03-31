@@ -1,10 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import './Modal.css';
 
 const isEventOwner = (me, event) => me && event && (me._id === event.creator._id);
 
-const modal = props => {
+const Modal = props => {
   return (
     <div className="modal">
       <header className="modal__header">
@@ -32,4 +33,18 @@ const modal = props => {
   );
 };
 
-export default modal;
+Modal.propTypes = {
+  me: PropTypes.object,
+  title: PropTypes.string,
+  event: PropTypes.object,
+  children: PropTypes.array.isRequired,
+  canCancel: PropTypes.bool,
+  onCancel: PropTypes.func,
+  canDelete: PropTypes.bool,
+  onDelete: PropTypes.func,
+  canConfirm: PropTypes.bool,
+  onConfirm: PropTypes.func,
+  confirmText: PropTypes.string.isRequired
+}
+
+export default Modal;

@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import './EventItem.css';
 
-const eventItem = ({currentUser, event, onDetail}) => (
+const EventItem = ({currentUser, event, onDetail}) => (
   <li key={event._id} className="events__list-item">
     <div>
       <h1>{event.title}</h1>
@@ -23,4 +24,10 @@ const eventItem = ({currentUser, event, onDetail}) => (
   </li>
 );
 
-export default eventItem;
+EventItem.propTypes = {
+  event: PropTypes.object.isRequired,
+  currentUser: PropTypes.object,
+  onDetail: PropTypes.func.isRequired
+}
+
+export default EventItem;

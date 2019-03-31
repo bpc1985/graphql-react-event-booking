@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import './BookingList.css';
 
-const bookingList = props => (
+const BookingList = props => (
   <ul className="bookings__list">
     {props.bookings.map(booking => {
       return (
@@ -20,4 +21,9 @@ const bookingList = props => (
   </ul>
 );
 
-export default bookingList;
+BookingList.propTypes = {
+  bookings: PropTypes.array,
+  onDelete: PropTypes.func.isRequired
+}
+
+export default BookingList;

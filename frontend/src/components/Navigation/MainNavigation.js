@@ -4,7 +4,7 @@ import Logout from './Logout';
 import User from './User';
 import './MainNavigation.css';
 
-const mainNavigation = props => (
+const MainNavigation = () => (
   <header className="main-navigation">
     <div className="main-navigation__logo">
       <h1>EasyEvent</h1>
@@ -39,4 +39,4 @@ const mainNavigation = props => (
   </header>
 );
 
-export default mainNavigation;
+export default MainNavigation;
